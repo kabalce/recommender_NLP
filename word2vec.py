@@ -1,9 +1,10 @@
+import pickle
 import pandas as pd
 from gensim.models.phrases import Phrases, Phraser
 from gensim.models import Word2Vec
 import numpy as np
 
-source_path = "data/raw/Watches.csv"
+source_path = "data/nlp/Patio.csv"
 df_clean = pd.read_csv(source_path)
 
 print("Setup completed.\n\n")
@@ -23,7 +24,7 @@ w2v_model.train(sentences, total_examples=w2v_model.corpus_count, epochs=10, rep
 
 print("Model trained.\n\n")
 
-for i in range(len(sent[:100])):
+for i in range(len(sent)):
     word_tokens = sent[i]
     words_mean = np.mean(w2v_model.wv.vectors_for_all(word_tokens).vectors, axis=0).reshape(-1, 200)
     if i == 0:
@@ -31,4 +32,7 @@ for i in range(len(sent[:100])):
     else:
         x_train = np.concatenate((x_train, words_mean))
 
-x_train = np.c_[np.transpose(df_clean["score"].values[:100]), x_train]
+x_train = np.c_[np.transpose(df_clean["score"].values), x_train]
+
+with open("data/train_data.pkl", "wb") as f:
+    pickle.dump(x_train, f)

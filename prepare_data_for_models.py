@@ -29,9 +29,10 @@ def confidence(ups, n):
     return (left - right) / under
 
 def clean_text(text, wnl):
+    text = str(text)
     text = contractions.fix(text, slang=True)
     text = text.lower()
-    re.sub(r"\d+", "", re.sub(r"(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)|^rt|http.+?", "", text))
+    text = re.sub(r"\d+", "", re.sub(r"(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)|^rt|http.+?", "", text))
     words = word_tokenize(text)
     return " ".join([wnl.lemmatize(i) for i in words])
 
@@ -43,7 +44,8 @@ def preprare_data(min_opinions):
     Path(nlp_path).mkdir(exist_ok=True, parents=True)
     Path(recommend_path).mkdir(exist_ok=True, parents=True)
     wnl = WordNetLemmatizer()
-    inputs = [f for f in os.listdir(source_path) if not f.startswith('.')]
+    # inputs = [f for f in os.listdir(source_path) if not f.startswith('.')]
+    inputs = ["Patio.csv"]
     for file_name in inputs:
         print(f"Processing {file_name}")
         df = pd.read_csv(f"{source_path}/{file_name}")
