@@ -1,17 +1,17 @@
 import gzip
 import pandas as pd
-import numpy as np
+import argparse
 
-categories = ["Amazon_Instant_Video", "Arts", "Automotive", "Baby", "Beauty",
-                  # "Books",  # 4.7 GB
-                  "Cell_Phones_&_Accessories",
-                  "Clothing_&_Accessories", "Electronics", "Gourmet_Foods", "Health", "Home_&_Kitchen",
-                  "Industrial_&_Scientific", "Jewelry", "Kindle_Store",
-                  # "Movies_&_TV",  # 2.9 GB
-                  "Musical_Instruments",
-                  # "Music",  # 2.2 GB
-                  "Office_Products", "Patio", "Pet_Supplies", "Shoes", "Software", "Sports_&_Outdoors",
-                  "Tools_&_Home_Improvement", "Toys_&_Games", "Video_Games", "Watches"]
+
+# Excluded from processing:
+# - "Books", 4.7 GB
+# - "Movies_&_TV", 2.9 GB
+# - "Music", 2.2 GB
+categories = ["Amazon_Instant_Video", "Arts", "Automotive", "Baby", "Beauty", "Cell_Phones_&_Accessories",
+              "Clothing_&_Accessories", "Electronics", "Gourmet_Foods", "Health", "Home_&_Kitchen",
+              "Industrial_&_Scientific", "Jewelry", "Kindle_Store", "Musical_Instruments", "Office_Products",
+              "Patio", "Pet_Supplies", "Shoes", "Software", "Sports_&_Outdoors", "Tools_&_Home_Improvement",
+              "Toys_&_Games", "Video_Games", "Watches"]
 
 
 def load_reviews_to_df(path) -> pd.DataFrame:
@@ -34,18 +34,24 @@ def load_reviews_to_df(path) -> pd.DataFrame:
     reviews.columns = colNames
     reviews[['score']] = reviews[['score']].astype(float)
     reviews['time'] = pd.to_datetime(reviews['time'], unit='s')
-
     return reviews
 
 def save_reduced_reviews(input, output):
     reviews = load_reviews_to_df(input)
     reviews["helpfulness_num"] = reviews["helpfulness"].apply(lambda x: int(x.split("/")[0]))
     reviews["helpfulness_den"] = reviews["helpfulness"].apply(lambda x: int(x.split("/")[1]))
-    reviews[['productId', 'price', 'userId', 'helpfulness_num', 'helpfulness_den', 'score', 'time']].to_csv(output, ignore_index=True)
+    reviews.to_csv(output, index=False)
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--source-dir", help="compressed files directory", type=str)
+    args = parser.parse_args()
+    return args.source_dir
 
 if __name__ == "__main__":
+    source = parse_args()
     for category in categories:
         print(category)
-        input_path = f'/home/kabalce/Downloads/{category}.txt.gz'
+        input_path = f'{source}/{category}.txt.gz'
         output_path = f'data/raw/{category}.csv'
         save_reduced_reviews(input_path, output_path)
