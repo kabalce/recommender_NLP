@@ -2,6 +2,12 @@ import pandas as pd
 import argparse
 import os
 from pathlib import Path
+from math import sqrt
+import contractions
+import re
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+
 
 
 def clean_data(df, min_opinions):
@@ -12,12 +18,31 @@ def clean_data(df, min_opinions):
     return df.loc[df["userId"].isin(users), ]
 
 
+def confidence(ups, n):
+    if n == 0:
+        return 0
+    z = 1.281551565545
+    p = float(ups) / n
+    left = p + 1 / (2 * n) * z ** 2
+    right = z * sqrt(p * (1 - p) / n + z ** 2 / (4 * n ** 2))
+    under = 1 + 1 / n * z ** 2
+    return (left - right) / under
+
+def clean_text(text, wnl):
+    text = contractions.fix(text, slang=True)
+    text = text.lower()
+    re.sub(r"\d+", "", re.sub(r"(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)|^rt|http.+?", "", text))
+    words = word_tokenize(text)
+    return " ".join([wnl.lemmatize(i) for i in words])
+
+
 def preprare_data(min_opinions):
     source_path = "data/raw"
     nlp_path = "data/nlp"
     recommend_path = "data/recommend"
     Path(nlp_path).mkdir(exist_ok=True, parents=True)
     Path(recommend_path).mkdir(exist_ok=True, parents=True)
+    wnl = WordNetLemmatizer()
     inputs = [f for f in os.listdir(source_path) if not f.startswith('.')]
     for file_name in inputs:
         print(f"Processing {file_name}")
@@ -25,9 +50,10 @@ def preprare_data(min_opinions):
         print(f"\tOriginal size:       {df.shape}")
         df_cleaned = clean_data(df, min_opinions)
         print(f"\tSize after cleaning: {df_cleaned.shape}")
-
-        df_cleaned[["productId", "userId", "score"]].to_csv(f"{recommend_path}/{file_name}")
-        df_cleaned[["text", "summary", "score"]].to_csv(f"{nlp_path}/{file_name}")
+        df_cleaned["wilson_score"] = df_cleaned.apply(lambda row: confidence(row["helpfulness_num"], row["helpfulness_den"]), axis=1)
+        df_cleaned["text"] = df_cleaned["text"].apply(clean_text, wnl=wnl)
+        df_cleaned[["productId", "userId", "score", "wilson_score", "helpfulness_num", "helpfulness_den"]].to_csv(f"{recommend_path}/{file_name}")
+        df_cleaned[["text", "summary", "score", "helpfulness_num", "helpfulness_den"]].to_csv(f"{nlp_path}/{file_name}")
 
 
 def parse_args():
