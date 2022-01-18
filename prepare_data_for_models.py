@@ -2,6 +2,7 @@ import pandas as pd
 import argparse
 import os
 from pathlib import Path
+from math import sqrt
 
 
 def clean_data(df, min_opinions):
@@ -10,6 +11,18 @@ def clean_data(df, min_opinions):
     user_no_opinions = df[["userId", "productId"]].groupby("userId").count()
     users = user_no_opinions.loc[user_no_opinions["productId"] >= min_opinions, ].index.values
     return df.loc[df["userId"].isin(users), ]
+
+
+def confidence(ups, n):
+    if n == 0:
+        return 0
+    else:
+        z = 1.281551565545
+        p = float(ups) / n
+        left = p + 1 / (2 * n) * z ** 2
+        right = z * sqrt(p * (1 - p) / n + z ** 2 / (4 * n ** 2))
+        under = 1 + 1 / n * z ** 2
+        return (left - right) / under
 
 
 def preprare_data(min_opinions):
@@ -25,9 +38,9 @@ def preprare_data(min_opinions):
         print(f"\tOriginal size:       {df.shape}")
         df_cleaned = clean_data(df, min_opinions)
         print(f"\tSize after cleaning: {df_cleaned.shape}")
-
-        df_cleaned[["productId", "userId", "score"]].to_csv(f"{recommend_path}/{file_name}")
-        df_cleaned[["text", "summary", "score"]].to_csv(f"{nlp_path}/{file_name}")
+        df_cleaned["wilson_score"] = df_cleaned.apply(lambda row: confidence(row["helpfulness_num"], row["helpfulness_den"]), axis=1)
+        df_cleaned[["productId", "userId", "score", "wilson_score", "helpfulness_num", "helpfulness_den"]].to_csv(f"{recommend_path}/{file_name}")
+        df_cleaned[["text", "summary", "score", "helpfulness_num", "helpfulness_den"]].to_csv(f"{nlp_path}/{file_name}")
 
 
 def parse_args():
