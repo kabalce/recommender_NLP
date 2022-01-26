@@ -3,7 +3,7 @@ from xgboost import XGBClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
-with open("data/train_data.pkl", "rb") as f:
+with open("data/data_bow.pkl", "rb") as f:
     x_train = pickle.load(f)
 
 Y = x_train[:, 0]

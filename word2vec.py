@@ -16,17 +16,17 @@ sentences = bigram[sent]
 
 print("Data preprocessed.\n\n")
 
-w2v_model = Word2Vec(sentences=sentences, vector_size=200)
+w2v_model = Word2Vec(sentences=sentences, vector_size=300)
 
 w2v_model.build_vocab(sentences, progress_per=10000)
 
-w2v_model.train(sentences, total_examples=w2v_model.corpus_count, epochs=10, report_delay=1)
+w2v_model.train(sentences, total_examples=w2v_model.corpus_count, epochs=30, report_delay=1)
 
 print("Model trained.\n\n")
 
 for i in range(len(sent)):
     word_tokens = sent[i]
-    words_mean = np.mean(w2v_model.wv.vectors_for_all(word_tokens).vectors, axis=0).reshape(-1, 200)
+    words_mean = np.mean(w2v_model.wv.vectors_for_all(word_tokens).vectors, axis=0).reshape(-1, 300)
     if i == 0:
         x_train = words_mean
     else:
@@ -34,5 +34,5 @@ for i in range(len(sent)):
 
 x_train = np.c_[np.transpose(df_clean["score"].values), x_train]
 
-with open("data/train_data.pkl", "wb") as f:
+with open("data/data_w2v.pkl", "wb") as f:
     pickle.dump(x_train, f)
