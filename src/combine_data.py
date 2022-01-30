@@ -1,25 +1,36 @@
 import argparse
 import pickle
 
+def mean_imputation(df):
+    return None
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-m", "--method", help="na imputation method, one of: ...",
-                        type=int, default=5)
+                        type=int)
     parser.add_argument("-i", "--input-path-df", help="input pickle file path df",
-                        type=str, default=5)
-    parser.add_argument("-i", "--input-path-pkl", help="input pickle file path pkl",
-                        type=str, default=5)
-    parser.add_argument("-o", "--output-path-df", help="output pickle file path df",
-                        type=str, default=5)
-    parser.add_argument("-p", "--output-path-pkl", help="output pickle file path pkl",
-                        type=str, default=5)
+                        type=str)
+    parser.add_argument("-j", "--input-path-pkl", help="input pickle file path pkl",
+                        type=str)
+    parser.add_argument("-o", "--output-path", help="output pickle file path pkl",
+                        type=str)
     args = parser.parse_args()
-    return args.method, args.input_path_train, args.input_path_test, args.output_path_train, args.output_path_test
+    return args.method, args.input_path_df, args.input_path_pkl, args.output_path
 
 
 if __name__ == "__main__":
-    method, input_path_train, input_path_test, output_path_train, output_path_test = parse_args()
-    with open(input_path_train, "rb") as f:
-        data_train = pickle.load(f)
-    with open(input_path_test, "rb") as f:
-        data_test = pickle.load(f)
+    method, input_path_df, input_path_pkl, output_path = parse_args()
+    with open(input_path_df, "rb") as f:
+        df_clean = pickle.load(f)
+    with open(input_path_pkl, "rb") as f:
+        results = pickle.load(f)
+
+    df_clean["score"] = results
+
+    method_functions = {"mean": mean_imputation}
+    # make recommendation matrix
+    assert method in method_functions.keys(), f"Unrecognised method: {method}"
+    recommendation_matrix = method_functions[method]
+
+    with open(output_path, "wb") as f:
+        pickle.dump(recommendation_matrix, f)

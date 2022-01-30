@@ -69,13 +69,13 @@ def TFIDF(df_train, df_test):
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-m", "--method", help="vectorisation method, one of: bow, w2v, tfidf",
-                        type=int, default=5)
+                        type=str)
     parser.add_argument("-i", "--input-path", help="input csv file path",
-                        type=str, default=5)
+                        type=str)
     parser.add_argument("-o", "--output-path-train-val", help="output pickle file path for data for modeling",
-                        type=str, default=5)
-    parser.add_argument("-o", "--output-path-test", help="output pickle file path for data for testing",
-                        type=str, default=5)
+                        type=str)
+    parser.add_argument("-u", "--output-path-test", help="output pickle file path for data for testing",
+                        type=str)
     args = parser.parse_args()
     return args.method, args.input_path, args.output_path_train_val, args.output_path_test
 
@@ -92,7 +92,7 @@ if __name__ == "__main__":
     # vectorise
     assert method in method_functions.keys(), f"Unrecognised method: {method}"
     data_train, data_test = method_functions[method]
-    
+
     # Save results
     with open(output_path_train_val, "rb") as f:
         pickle.dump(data_train, f)

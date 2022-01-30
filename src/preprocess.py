@@ -62,15 +62,15 @@ def clean_text(text, wnl):
     return " ".join([wnl.lemmatize(i) for i in words])
 
 
-def prepare_data(min_opinions, input_path, output_path):
+def prepare_data(min_opinions, input_path):
     Path(output_path).parent.mkdir(exist_ok=True, parents=True)
     wnl = WordNetLemmatizer()
     df = load_reviews_to_df(input_path)
-    df_cleaned = select_rows(df, min_opinions)
-    df_cleaned["wilson_score"] = df_cleaned.apply(
+    df_clean = select_rows(df, min_opinions)
+    df_clean["wilson_score"] = df_clean.apply(
         lambda row: confidence(row["helpfulness_num"], row["helpfulness_den"]), axis=1)
-    df_cleaned["text"] = df_cleaned["text"].apply(clean_text, wnl=wnl)
-    df_cleaned.to_csv(output_path, index=False)
+    df_clean["text"] = df_clean["text"].apply(clean_text, wnl=wnl)
+    return df_clean
 
 
 def parse_args():
@@ -78,13 +78,14 @@ def parse_args():
     parser.add_argument("-m", "--min-opinions", help="minimal number of opinions required to include user in data",
                         type=int, default=5)
     parser.add_argument("-i", "--input-path", help="input gz file path",
-                        type=str, default=5)
+                        type=str)
     parser.add_argument("-o", "--output-path", help="output csv file path",
-                        type=str, default=5)
+                        type=str)
     args = parser.parse_args()
     return args.min_opinions, args.input_path, args.output_path
 
 
 if __name__ == "__main__":
     min_opinions, input_path, output_path = parse_args()
-    prepare_data(min_opinions, input_path, output_path)
+    df_clean = prepare_data(min_opinions, input_path)
+    df_clean.to_csv(output_path, index=False)

@@ -36,14 +36,19 @@ if __name__ == "__main__":
         data_test = pickle.load(f)
     X_train, y_train = data_train[:, 1:], data_train[:, 0]
 
+    method_functions = {"xgb": xgboost}
+
     # make classification
-    model = None
+    assert method in method_functions.keys(), f"Unrecognised method: {method}"
+    model = method_functions[method]
+
+    # build predictions
     results_train = 0
-    with open(output_path_train, "rb") as f:
+    with open(output_path_train, "wb") as f:
         pickle.dump(results_train, f)
 
     if data_test != None and output_path_test != None:
         X_test, y_test = data_test[:, 1:], data_test[:, 0]
         results_test = 0
-        with open(output_path_test, "rb") as f:
+        with open(output_path_test, "wb") as f:
             pickle.dump(results_test, f)
