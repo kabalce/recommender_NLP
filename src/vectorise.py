@@ -85,9 +85,14 @@ if __name__ == "__main__":
     df_clean = pd.read_csv(input_path)
     df_train, df_test_val = data_split(df_clean)
 
-    # vectorise
-    data_train, data_test = None, None
+    method_functions = {"bow": bag_of_words,
+                        "w2v": word2vec,
+                        "tfidf": TFIDF}
 
+    # vectorise
+    assert method in method_functions.keys(), f"Unrecognised method: {method}"
+    data_train, data_test = method_functions[method]
+    
     # Save results
     with open(output_path_train_val, "rb") as f:
         pickle.dump(data_train, f)
