@@ -3,15 +3,15 @@ import pickle
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-m", "--method", help="vectorisation method, one of: bow, w2v, tfidf",
+    parser.add_argument("-m", "--method", help="na imputation method, one of: ...",
                         type=int, default=5)
-    parser.add_argument("-i", "--input-path-train", help="input pickle file path train",
+    parser.add_argument("-i", "--input-path-df", help="input pickle file path df",
                         type=str, default=5)
-    parser.add_argument("-i", "--input-path-test", help="input pickle file path test",
+    parser.add_argument("-i", "--input-path-pkl", help="input pickle file path pkl",
                         type=str, default=5)
-    parser.add_argument("-o", "--output-path-train", help="output pickle file path train",
+    parser.add_argument("-o", "--output-path-df", help="output pickle file path df",
                         type=str, default=5)
-    parser.add_argument("-o", "--output-path-test", help="output pickle file path test",
+    parser.add_argument("-p", "--output-path-pkl", help="output pickle file path pkl",
                         type=str, default=5)
     args = parser.parse_args()
     return args.method, args.input_path_train, args.input_path_test, args.output_path_train, args.output_path_test
