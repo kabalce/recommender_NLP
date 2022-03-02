@@ -22,8 +22,8 @@ def load_reviews_to_df(input_path):
                 dictionary = {}
 
     col_names = ['productId', 'title', 'price', 'userId',
-                'profileName', 'helpfulness', 'score',
-                'time', 'summary', 'text']
+                 'profileName', 'helpfulness', 'score',
+                 'time', 'summary', 'text']
 
     reviews = pd.DataFrame(reviews_array)
     reviews.columns = col_names
@@ -36,10 +36,11 @@ def load_reviews_to_df(input_path):
 
 def select_rows(df, min_opinions):
     df["year"] = df['time'].astype('datetime64[ns]').dt.year
-    df = df.loc[(df["userId"] != "unknown") & df["year"].isin([2011, 2012, 2013]), ]
-    user_no_opinions = df[["userId", "productId"]].groupby("userId").count()
+    df = df.loc[(df["userId"] != "unknown") & df["year"].isin([2010, 2011, 2012, 2013]), ]
+    user_no_opinions = df.loc[df["year"].isin([2012, 2013]), ["userId", "productId"]].groupby("userId").count()
     users = user_no_opinions.loc[user_no_opinions["productId"] >= min_opinions, ].index.values
-    return df.loc[df["userId"].isin(users), ["productId", "userId", "score", "text", "helpfulness_num", "helpfulness_den"]]
+    return df.dropna().loc[df["userId"].isin(users) | df["year"].isin([2010, 2011]),
+                           ["productId", "userId", "score", "text", "helpfulness_num", "helpfulness_den", "year"]]
 
 
 def confidence(ups, n):

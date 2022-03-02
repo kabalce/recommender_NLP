@@ -1,8 +1,8 @@
 import argparse
 import pickle
 
-def mean_imputation(df):
-    return None
+def mean_imputation(df):  # TODO
+    return df
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     method_functions = {"mean": mean_imputation}
     # make recommendation matrix
     assert method in method_functions.keys(), f"Unrecognised method: {method}"
-    recommendation_matrix = method_functions[method]
+    recommendation_matrix = method_functions[method](df_clean)
 
     with open(output_path, "wb") as f:
         pickle.dump(recommendation_matrix, f)
